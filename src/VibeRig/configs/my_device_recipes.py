@@ -2,10 +2,10 @@ from dataclasses import replace
 
 from expidite_rpi import DPtree
 from expidite_rpi import configuration as root_cfg
-from expidite_rpi.sensors.sensor_audio_on_demand import (
-    DEFAULT_AUDIO_SENSOR_CFG,
-    AudioSensor,
-    AudioSensorCfg,
+from expidite_rpi.sensors.sensor_continuous_audio import (
+    DEFAULT_CONTINUOUS_AUDIO_SENSOR_CFG,
+    ContinuousAudioSensor,
+    ContinuousAudioSensorCfg,
 )
 from expidite_rpi.sensors.sensor_rpicam_vid import (
     DEFAULT_RPICAM_SENSOR_CFG,
@@ -19,11 +19,11 @@ logger = root_cfg.setup_logger("vibe_rig")
 def create_vibe_rig_monitor() -> list[DPtree]:
     """Create a basic vibe rig monitor with continuous recording of video and audio."""
     # Define the audio sensor
-    audio_cfg: AudioSensorCfg = replace(
-        DEFAULT_AUDIO_SENSOR_CFG,
+    audio_cfg: ContinuousAudioSensorCfg = replace(
+        DEFAULT_CONTINUOUS_AUDIO_SENSOR_CFG,
         sensor_index=1,
     )
-    my_audio_sensor = AudioSensor(audio_cfg)
+    my_audio_sensor = ContinuousAudioSensor(audio_cfg)
 
     # Define the video sensor
     video_cfg: RpicamSensorCfg = replace(
@@ -43,11 +43,11 @@ def create_vibe_rig_monitor() -> list[DPtree]:
 def create_vibe_rig_controller() -> list[DPtree]:
     """Create a basic vibe rig controller, that just records audio."""
     # Define the audio sensor
-    audio_cfg: AudioSensorCfg = replace(
-        DEFAULT_AUDIO_SENSOR_CFG,
+    audio_cfg: ContinuousAudioSensorCfg = replace(
+        DEFAULT_CONTINUOUS_AUDIO_SENSOR_CFG,
         sensor_index=1,
     )
-    my_audio_sensor = AudioSensor(audio_cfg)
+    my_audio_sensor = ContinuousAudioSensor(audio_cfg)
 
     my_audio_tree = DPtree(my_audio_sensor)
     return [my_audio_tree]
