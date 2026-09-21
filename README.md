@@ -18,7 +18,7 @@ The current VibeRig is very much a prototype and needs further work before prope
 
 - **Structure**: box / frame that mounts the shake plate on which the bees are placed.
 - **Controller**: vibration control RPI, driving an "exciter" (aka speaker) attached to the shake plate.
-- **Monitoring**: RPI running ExPiDITE, recording video, audio and [optinally] acceleration of the shake plate.
+- **Monitor**: RPI running ExPiDITE, recording video, audio and [optinally] acceleration of the shake plate.
 
 ## Software
 
