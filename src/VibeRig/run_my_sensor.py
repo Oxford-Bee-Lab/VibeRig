@@ -1,0 +1,41 @@
+##############################################################################################################
+# The run_my_sensor script is invoked by the RpiCore at startup.
+# It provides a means for users to customize the behavior of the RpiCore and run their own code.
+#
+# By default, it:
+# - loads the fleet configuration specified in system_cfg.my_fleet_config
+# - starts the RpiCore
+##############################################################################################################
+
+from expidite_rpi import RpiCore
+from expidite_rpi import configuration as root_cfg
+
+logger = root_cfg.setup_logger("vibe_rig")
+
+
+def main() -> None:
+    """Run RpiCore as defined in the system.cfg file."""
+    sc = None
+    try:
+        # Configure the RpiCore with the fleet configuration.
+        # This will load the configuration specified in system_cfg.my_fleet_config and check for errors.
+        logger.info("Creating RpiCore...")
+        sc = RpiCore(root_cfg.load_configuration())
+
+        # Start the RpiCore and begin data collection
+        logger.info("Starting RpiCore...")
+        sc.start()
+        while not sc.wait(timeout=1800):
+            logger.info(sc.status())
+
+    except KeyboardInterrupt:
+        logger.exception("Keyboard interrupt => stopping RpiCore... this may take up to 180s.")
+    except Exception:
+        logger.exception("Error")
+    finally:
+        if sc:
+            sc.stop()
+
+
+if __name__ == "__main__":
+    main()

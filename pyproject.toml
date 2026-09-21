@@ -1,0 +1,180 @@
+[build-system]
+requires = ["setuptools==84.0.0", "tomli==2.4.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "VibeRig"
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "expidite @ git+https://github.com/oxford-bee-ops/expidite.git",
+    "pandas==3.0.6",
+    "polars==1.44.2",
+    "psutil==7.2.2",
+    "pyarrow==25.0.1",
+    "PyGithub == 2.10.0",
+    "scipy==1.17.1",
+    "soundfile==0.14.0",
+    "torch==2.6.0",
+    "torchvision==0.21",
+    "ultralytics==8.4.155",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build==1.6.0", # For building and publishing packages.
+    "codespell==2.4.3",
+    "deadcode==2.4.1",
+    "ipython==9.16.1",
+    "matplotlib==3.11.0",
+    "mypy==2.3.1",
+    "pandas-stubs==3.0.5.260914",
+    "pyinstrument==5.1.3",
+    "pyright==1.1.414",
+    "pytest==9.1.1",
+    "pytz==2026.2",
+    'ray==2.54.1; sys_platform == "linux"',
+    "ruff==0.16.8",
+    "scikit-learn==1.9.1",
+    "seaborn==0.13.2",
+    "ty==0.0.82",
+    "types-python-dateutil==2.9.0.20260807",
+    "types-pytz==2026.3.1.20260727",
+    "types-PyYAML==6.0.12.20260906",
+]
+
+[project.urls]
+repository = "https://github.com/Oxford-Bee-Lab/VibeRig"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["test*"]
+
+##############################################################################################################
+# ruff: static lint and style checker.
+##############################################################################################################
+[tool.ruff]
+line-length = 110
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ruff.lint]
+# Enable all standard ruff rules, unless explicitly overridden below.
+select = ["ALL"]
+# Enable some preview rules (all other preview rules not listed here are automatically ignored).
+preview = true
+explicit-preview-rules = true
+extend-select = ["RUF027", "RUF045"]
+# Ignore standard rules that we don't want to enforce, or that we do want to enforce but need to fix first.
+ignore = [
+    # Rules that we don't want to enforce.
+    "COM812",  # Little benefit.
+    "CPY001",
+    "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107",  # Public docstring.
+    "ERA",  # No benefit.
+    "FBT",  # No benefit.
+    "FIX",  # No benefit.
+    "G004",  # Prefer readability over this micro-optimization.
+    "PLC0415",  # We want this in some places.
+    "PLR0917",
+    "PLR2004",  # Little benefit in defining constants in many cases.
+    "PTH",  # No benefit.
+    "S101",  # No benefit.
+    "SIM102",  # Doesn't always improve readability.
+    "SIM108",  # Doesn't always improve readability.
+    "T20",  # We want this in some places.
+    "TD",  # No benefit.
+    "TRY003",  # No benefit.
+    # Rules that we should enforce, but need to fix the code first.
+    "ARG001",
+    "ARG002",
+    "BLE001",
+    "C901",
+    "D205",
+    "N",
+    "PD002",
+    "PD008",
+    "PD011",
+    "PGH003",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+    "PYI034",
+    "S112",
+    "S307",
+    "S602",
+    "S603",
+    "S607",
+    "TC",
+    "TRY300",
+    "TRY301",
+]
+# Rules that we should enforce, but need to fix the code first.
+[tool.ruff.lint.per-file-ignores]
+
+fixable = ["ALL"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+##############################################################################################################
+# mypy: static type checker
+##############################################################################################################
+[tool.mypy]
+python_version = "3.13"
+files = ["src"]
+exclude = [
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+]
+pretty = true
+
+# expidite_rpi and scipy ship without a py.typed marker / stubs.
+[[tool.mypy.overrides]]
+module = ["expidite_rpi.*", "scipy.*"]
+ignore_missing_imports = true
+
+##############################################################################################################
+# pyright: static type checker and bug detection.
+##############################################################################################################
+[tool.pyright]
+include = ["src"]
+exclude = [
+    "**/__pycache__",
+]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+reportAttributeAccessIssue = "none"
+reportMissingParameterType = "none"
+reportMissingTypeArgument = "none"
+reportMissingTypeStubs = "none"
+reportPrivateImportUsage = "none"
+reportUnknownArgumentType = "none"
+reportUnknownLambdaType = "none"
+reportUnknownMemberType = "none"
+reportUnknownParameterType = "none"
+reportUnknownVariableType = "none"
+
+##############################################################################################################
+# ty: static type checker.
+##############################################################################################################
+[tool.ty.src]
+include = ["src", "tests"]
+[tool.ty.environment]
+python-version = "3.13"
+
+##############################################################################################################
+# deadcode: unused code detection.
+# TODO: this tool generates a lot of false positives - configuration is required to eliminate them.
+##############################################################################################################
+[tool.deadcode]
+exclude = [".venv"]
+min-confidence = 90
+fail-on-found = true
