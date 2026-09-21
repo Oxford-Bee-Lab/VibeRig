@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import scipy.io.wavfile
 
-OUTPUT_DIR = Path.home() / "splat_output"
+OUTPUT_DIR = Path.home() / "vr_output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 FRAMES_PER_SECOND: int = 44100
@@ -37,13 +37,10 @@ CFG_COLS = [
 
 OUTPUT_COL_TONE_START_TIME = "tone_play_start_utc"
 
-handler = logging.StreamHandler(sys.stdout)
-
-
 ##############################################################################################################
 # Set up logging.
-logging.basicConfig(level=logging.DEBUG)  # enables DEBUG+ globally
-logger = logging.getLogger("SPlaT")
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("vibe_rig")
 logger.setLevel(logging.INFO)
 
 handler = logging.StreamHandler()
