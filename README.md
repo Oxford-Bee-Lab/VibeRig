@@ -7,9 +7,9 @@ script drives the **Controller** device.
 
 ## Bill of materials
 
-- **Structure**: rig frame that mounts the hive on a vibration-isolated platform.
-- **Controller**: vibration control & sound-playback RPI, driving a speaker / shaker attached to the rig.
-- **Monitoring**: RPI running ExPiDITE, recording acceleration, audio and video of the hive.
+- **Structure**: box / frame that mounts the shake plate on which the bees are placed.
+- **Controller**: vibration control RPI, driving an "exciter" (aka speaker) attached to the shake plate.
+- **Monitoring**: RPI running ExPiDITE, recording video, audio and [optinally] acceleration of the shake plate.
 
 ## Software
 
@@ -66,15 +66,10 @@ The Monitor runs the full ExPiDITE stack, configured for VibeRig.
    ```bash
    mkdir ~/.expidite
    ```
-6. Copy your `keys.env` and `system.cfg` files (based on the templates in
-   `expidite_rpi/example/` in the ExPiDITE repo) into `~/.expidite`:
+6. Copy your `keys.env` (based on the templates in
+   `expidite_rpi/example/` in the ExPiDITE repo) and `system.cfg` files (in VibeRig/configs) into `~/.expidite`:
    - In `keys.env`, set `cloud_storage_key` to the Shared Access Signature for the `LabWHO-2026` Azure
      Storage account.
-   - In `system.cfg`:
-     - Set `my_git_repo_url` to `https://github.com/Oxford-Bee-Lab/VibeRig` (or the SSH URL plus
-       `my_git_ssh_private_key_file` if the repo is private).
-     - Set `my_fleet_config` to `VibeRig.configs.fleet_config_lab.INVENTORY`.
-     - Set `auto_start` to `Yes` so the Monitor starts recording automatically on every boot.
 7. Copy the `rpi_installer.sh` script (from `expidite_rpi/scripts/` in the ExPiDITE repo) into
    `~/.expidite` and run it:
    ```bash
