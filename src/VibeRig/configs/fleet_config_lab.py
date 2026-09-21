@@ -41,13 +41,13 @@ class DefaultDevice(DeviceCfg):
 INVENTORY: list[DeviceCfg] = [
     DeviceCfg(
         name="Vibe-rig-controller",
-        device_id="d83addf7857a",
+        device_id="d83add4fc38b",
         notes="Vibe rig controller in Whytam lab",
         dp_trees_create_method=my_device_recipes.create_vibe_rig_controller,
     ),
     DeviceCfg(
         name="Vibe-rig-monitor",
-        device_id="d83add4fc376",
+        device_id="d83addf7857a",
         notes="Vibe rig monitor in Whytam lab",
         dp_trees_create_method=my_device_recipes.create_vibe_rig_monitor,
     ),
