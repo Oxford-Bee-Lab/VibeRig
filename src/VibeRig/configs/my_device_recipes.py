@@ -45,7 +45,6 @@ def create_vibe_rig_controller() -> list[DPtree]:
     audio_cfg: AudioSensorCfg = replace(
         DEFAULT_AUDIO_SENSOR_CFG,
         sensor_index=1,
-        microphones_installed=1,
     )
     my_audio_sensor = AudioSensor(audio_cfg)
 

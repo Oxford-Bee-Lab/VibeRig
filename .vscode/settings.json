@@ -11,6 +11,18 @@
         "/^python -m pytest test/test_startup\\.py -q$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^python -c \"import inspect; from expidite_rpi import RpiCore; from expidite_rpi\\.core import edge_orchestrator; print\\(inspect\\.getsource\\(RpiCore\\.start\\)\\); print\\(inspect\\.getsource\\(RpiCore\\.stop\\)\\); print\\('orchestrator:', edge_orchestrator\\.EdgeOrchestrator\\); print\\(inspect\\.getsource\\(edge_orchestrator\\.EdgeOrchestrator\\.start_all_with_watchdog\\)\\); print\\(inspect\\.getsource\\(edge_orchestrator\\.EdgeOrchestrator\\.stop_all\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python -c \"import inspect; from expidite_rpi import RpiCore; print\\(inspect\\.getsource\\(RpiCore\\.__init__\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python -m pytest -q$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }
