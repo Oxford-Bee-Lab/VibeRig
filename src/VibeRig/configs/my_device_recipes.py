@@ -31,6 +31,7 @@ def create_vibe_rig_monitor() -> list[DPtree]:
         rpicam_cmd=(
             "rpicam-vid --camera SENSOR_INDEX --framerate 10 --width 1296 --height 1296 -o FILENAME -t 180000"
         ),
+        sample_probability="1.0",
     )
     my_video_sensor = RpicamSensor(video_cfg)
 
