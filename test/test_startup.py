@@ -3,6 +3,7 @@ from expidite_rpi import RpiCore
 from expidite_rpi.core.edge_orchestrator import EdgeOrchestrator
 
 from VibeRig.configs.fleet_config_lab import INVENTORY
+from VibeRig.controller.vibe_controller import get_tone_config_list
 
 
 def test_monitor_and_controller_startup_configuration() -> None:
@@ -36,3 +37,10 @@ def test_rpi_core_starts_and_stops(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert started
     assert stopped
+
+
+def test_installed_controller_config_can_be_loaded_by_name() -> None:
+    """Load a bundled controller config without relying on the current directory."""
+    tone_configs = get_tone_config_list("config_test_5_knocks.csv")
+
+    assert tone_configs

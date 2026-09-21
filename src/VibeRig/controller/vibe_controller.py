@@ -11,6 +11,7 @@ import time
 import wave
 from collections.abc import Iterator
 from datetime import UTC, datetime
+from importlib import resources
 from pathlib import Path
 
 import numpy as np
@@ -51,7 +52,18 @@ logger.addHandler(handler)
 
 def get_tone_config_list(filename: str) -> list[dict]:
     """Read config from CSV and return as a list of key:value pairs."""
-    config_df = pd.read_csv(filepath_or_buffer=filename)
+    config_path = Path(filename)
+    if config_path.is_file():
+        config_source = config_path.open(mode="rb")
+    else:
+        config_resource = resources.files("VibeRig.controller").joinpath(filename)
+        if not config_resource.is_file():
+            msg = f"Config file not found: {filename}"
+            raise FileNotFoundError(msg)
+        config_source = config_resource.open(mode="rb")
+
+    with config_source:
+        config_df = pd.read_csv(filepath_or_buffer=config_source)
     tone_config_list: list[dict] = config_df.to_dict(orient="records")
 
     ##########################################################################################################
@@ -222,9 +234,10 @@ def run_experiment(config_filename: str) -> None:
 
 
 if __name__ == "__main__":
-    print("Running SPlat from command line")
+    print("Running vibe controller from command line")
     if len(sys.argv) != 2:
-        msg = "You must provide a config csv filename as a cmd line parameter"
-        raise ValueError(msg)
+        print("You must provide a config csv filename as a cmd line parameter")
+        sys.exit(1)
+
     config_filename = sys.argv[1]
     run_experiment(config_filename=config_filename)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "VibeRig"
-version = "0.0.5"
+version = "0.0.6"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -50,6 +50,9 @@ repository = "https://github.com/Oxford-Bee-Lab/VibeRig"
 [tool.setuptools.packages.find]
 where = ["src"]
 exclude = ["test*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.csv"]
 
 ##############################################################################################################
 # ruff: static lint and style checker.
