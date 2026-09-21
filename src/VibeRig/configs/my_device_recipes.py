@@ -2,6 +2,10 @@ from dataclasses import replace
 
 from expidite_rpi import DPtree
 from expidite_rpi import configuration as root_cfg
+from expidite_rpi.sensors.sensor_adxl34x import (
+    ADXL34X,
+    DEFAULT_ADXL34X_SENSOR_CFG,
+)
 from expidite_rpi.sensors.sensor_continuous_audio import (
     DEFAULT_CONTINUOUS_AUDIO_SENSOR_CFG,
     ContinuousAudioSensor,
@@ -41,9 +45,13 @@ def create_vibe_rig_monitor() -> list[DPtree]:
     )
     my_video_sensor = RpicamSensor(video_cfg)
 
+    # Define the AXCL343 sensor
+    my_axcl343_sensor = ADXL34X(DEFAULT_ADXL34X_SENSOR_CFG)
+
     my_audio_tree = DPtree(my_audio_sensor)
     my_video_tree = DPtree(my_video_sensor)
-    return [my_audio_tree, my_video_tree]
+    my_adxl_tree = DPtree(my_axcl343_sensor)
+    return [my_audio_tree, my_video_tree, my_adxl_tree]
 
 
 def create_vibe_rig_controller() -> list[DPtree]:
