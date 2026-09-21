@@ -172,12 +172,3 @@ reportUnknownVariableType = "none"
 include = ["src", "tests"]
 [tool.ty.environment]
 python-version = "3.13"
-
-##############################################################################################################
-# deadcode: unused code detection.
-# TODO: this tool generates a lot of false positives - configuration is required to eliminate them.
-##############################################################################################################
-[tool.deadcode]
-exclude = [".venv"]
-min-confidence = 90
-fail-on-found = true
