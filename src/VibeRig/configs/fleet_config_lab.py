@@ -32,7 +32,6 @@ wifi_clients: list[WifiClient] = [
 @dataclass
 class DefaultDevice(DeviceCfg):
     log_level: int = logging.DEBUG
-    wifi_clients: list[WifiClient] = wifi_clients
 
 
 ##############################################################################################################
@@ -44,11 +43,13 @@ INVENTORY: list[DeviceCfg] = [
         device_id="d83add4fc38b",
         notes="Vibe rig controller in Whytam lab",
         dp_trees_create_method=my_device_recipes.create_vibe_rig_controller,
+        wifi_clients=wifi_clients,
     ),
     DeviceCfg(
         name="Vibe-rig-monitor",
         device_id="d83addf7857a",
         notes="Vibe rig monitor in Whytam lab",
         dp_trees_create_method=my_device_recipes.create_vibe_rig_monitor,
+        wifi_clients=wifi_clients,
     ),
 ]
