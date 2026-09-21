@@ -1,11 +1,20 @@
 # VibeRig
 
-VibeRig is a rig for studying bumblebee responses to vibration stimuli. It is built on top
+The VibeRig is a rig for studying bumblebee responses to vibrational stimuli. It is built on top
 of [ExPiDITE](https://github.com/Oxford-Bee-Ops/expidite), which provides the fleet management, sensor
 recording and cloud-upload framework used by the **Monitor** device, while a lightweight standalone
 script drives the **Controller** device.
 
-## Bill of materials
+## Prototype status
+
+The current VibeRig is very much a prototype and needs further work before proper use:
+- The **Controller** script is manually triggered; we could enhance it to run a full multi-day pre-configured program of stimuli at defined times
+- The monitor just records 100% of video & audio; we could enhance it to be movement-activated and discard recording with no activity.  We could further enhance it to run the ML processing in real-time and just upload behavioural stats.
+- We need to think about how the box containing the bees is fastened to the plate to ensure good transmission of vibrations
+- We should replace the threaded screw uprights with 3d printed smooth uprights
+- The shake plate hasn't been calibrated, so we don't know if the programmed frequencies etc actually translate into the intended frequency / amplitude patterns in the plate itself
+
+## Parts
 
 - **Structure**: box / frame that mounts the shake plate on which the bees are placed.
 - **Controller**: vibration control RPI, driving an "exciter" (aka speaker) attached to the shake plate.
@@ -14,7 +23,7 @@ script drives the **Controller** device.
 ## Software
 
 - Code lives in the GitHub repo [Oxford-Bee-Lab/VibeRig](https://github.com/Oxford-Bee-Lab/VibeRig).
-- VibeRig must be installed on **both** devices (Monitor and Controller).
+- The VibeRig must be installed on **both** devices (Monitor and Controller).
 - The **Monitor** runs [ExPiDITE](https://github.com/Oxford-Bee-Ops/expidite), configured using the fleet
   config at [src/VibeRig/configs/fleet_config_lab.py](src/VibeRig/configs/fleet_config_lab.py).
 - The **Controller** is deliberately simple: it just runs
