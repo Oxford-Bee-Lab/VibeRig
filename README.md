@@ -83,8 +83,8 @@ The Monitor runs the full ExPiDITE stack, configured for VibeRig.
 
 ### Installing the Controller device
 
-The Controller does not run ExPiDITE - it just needs Python and the VibeRig package so it can run
-`vibe_controller.py`.
+The Controller does not run ExPiDITE - it just needs Python and the VibeRig package so it can run the
+`VibeRig.controller.vibe_controller` module.
 
 1. Physically build the controller, attaching the DAC hat to the RPI, connect the DAC to the amp using RCA      cables; and connect the amp to the exciter.  Attach the exciter to the underside of the shake plate.
 2. Flash an SD card with Raspberry Pi OS, install it and power up the RPI. Attach the speaker / shaker
@@ -93,12 +93,11 @@ The Controller does not run ExPiDITE - it just needs Python and the VibeRig pack
    ```bash
    pip install git+https://github.com/Oxford-Bee-Lab/VibeRig.git
    ```
-4. Confirm the controller scripts and config are present:
+4. Confirm the VibeRig package is installed:
    ```bash
-   ls
+   python -c "import VibeRig"
    ```
-   You should see `vibe_controller.py` and one or more `config_test*.csv` files under
-   [src/VibeRig/controller/](src/VibeRig/controller/).
+   The controller module and bundled `config_test*.csv` files are installed as package resources.
 
 ## Operation
 
@@ -114,15 +113,20 @@ The current rig has two RPIs:
 The Controller is used to trigger a vibration stimulus:
 
 1. Log in over SSH with `bee-ops` & password.
-2. Run `ls` to confirm the presence of `vibe_controller.py` and the `config_test*.csv` files.
-3. Edit (or choose) a `config_test*.csv` file to specify the audio / vibration sequence you want to
-   play. Each row defines one tone: `frequency`, `duration_seconds`, `relative_volume` and
+2. Choose a bundled `config_test*.csv` file or provide a path to your own CSV. Each row defines one tone:
+   `frequency`, `duration_seconds`, `relative_volume` and
    `silence_after`.
-4. Trigger the stimulus, passing the config file as the only argument, for example:
+3. Trigger the stimulus with the module invocation, passing the CSV name or path as the only argument:
    ```bash
-   python vibe_controller.py config_test_5_knocks.csv
+   python -m VibeRig.controller.vibe_controller config_test_5_knocks.csv
    ```
-   A results file, recording the actual start time of each tone, is written to `~/splat_output`.
+   For a custom CSV, pass its path instead:
+   ```bash
+   python -m VibeRig.controller.vibe_controller /path/to/my_config.csv
+   ```
+   If the argument names an existing file, that file is loaded. Otherwise, the controller looks for a CSV
+   with that name bundled in `VibeRig.controller`. A results file, recording the actual start time of each
+   tone, is written to `~/vr_output`.
 
 ### Debugging the audio chain (DAC hat → amp → exciter)
 
@@ -159,7 +163,7 @@ outwards:
 4. **End-to-end**: once each hop checks out, confirm the full pipeline with one of the actual test
    configs:
    ```bash
-   python vibe_controller.py config_test_5_knocks.csv
+   python -m VibeRig.controller.vibe_controller config_test_5_knocks.csv
    ```
 
 ### Monitor: continuous recording

@@ -5,6 +5,7 @@ import logging
 import math
 import os
 import platform
+import re
 import subprocess
 import sys
 import time
@@ -13,10 +14,9 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from importlib import resources
 from pathlib import Path
+from typing import IO
 
-import numpy as np
 import pandas as pd
-import scipy.io.wavfile
 
 OUTPUT_DIR = Path.home() / "vr_output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -38,6 +38,8 @@ CFG_COLS = [
 
 OUTPUT_COL_TONE_START_TIME = "tone_play_start_utc"
 
+ALSA_CONTROL_PREFERENCE = ("Digital", "Master", "PCM", "Speaker", "Headphone")
+
 ##############################################################################################################
 # Set up logging.
 logging.basicConfig(level=logging.DEBUG)
@@ -53,6 +55,7 @@ logger.addHandler(handler)
 def get_tone_config_list(filename: str) -> list[dict]:
     """Read config from CSV and return as a list of key:value pairs."""
     config_path = Path(filename)
+    config_source: IO[bytes]
     if config_path.is_file():
         config_source = config_path.open(mode="rb")
     else:
@@ -97,7 +100,7 @@ def get_tone_config_list(filename: str) -> list[dict]:
     return tone_config_list
 
 
-def create_sine_wav_file_using_math_wave(duration: float, frequency: float, relative_volume: float) -> str:
+def create_sine_wav_file(duration: float, frequency: float, relative_volume: float) -> str:
     """Create an 8-bit PCM, mono wav file in current directory, return the filename."""
 
     def sound_wave() -> Iterator[int]:
@@ -116,25 +119,51 @@ def create_sine_wav_file_using_math_wave(duration: float, frequency: float, rela
     return SINE_WAV_FILENAME
 
 
-def create_sine_wav_file_using_scipy(duration: float, frequency: float, relative_volume: float) -> str:
-    """Create a 16 bit PCM, mono wav file in current directory, return the filename."""
-    # Generate time points
-    time_points = np.linspace(0, duration, int(FRAMES_PER_SECOND * duration))
-
-    # Generate sine wave with maximum 16 bit amplitude/value for relative_volume = 100
-    max_16_bit_value = np.iinfo(np.int16).max
-    sine_wave = relative_volume / 100 * max_16_bit_value * np.sin(frequency * time_points * 2 * np.pi)
-
-    # Save the WAV file
-    scipy.io.wavfile.write(SINE_WAV_FILENAME, FRAMES_PER_SECOND, sine_wave)
-    logger.debug(f"Wav file {SINE_WAV_FILENAME} created, {frequency=}")
-
-    return SINE_WAV_FILENAME
-
-
 def delete_wav_file(filename: str) -> None:
     logger.debug("Delete wav file")
     os.remove(filename)
+
+
+def discover_alsa_settings() -> tuple[str, str | None]:
+    """Find an ALSA playback device and a suitable mixer control."""
+    result = subprocess.run(
+        ["aplay", "-l"],
+        capture_output=True,
+        check=True,
+        text=True,
+    )
+    card_matches = re.finditer(
+        pattern=r"^card (\d+):.*$",
+        string=result.stdout,
+        flags=re.MULTILINE | re.IGNORECASE,
+    )
+    card_descriptions = {match.group(1): match.group(0).lower() for match in card_matches}
+    cards = list(card_descriptions)
+    if not cards:
+        msg = "No ALSA playback cards found. Check the output of 'aplay -l'."
+        raise RuntimeError(msg)
+
+    dac_cards = [card for card in cards if "dac" in card_descriptions[card]]
+    if not dac_cards:
+        msg = "No ALSA playback card with 'DAC' in its description was found. Check the output of 'aplay -l'."
+        raise RuntimeError(msg)
+
+    for card in dac_cards:
+        controls = subprocess.run(
+            ["amixer", "-c", card, "scontrols"],
+            capture_output=True,
+            check=True,
+            text=True,
+        ).stdout
+        control_names = re.findall(pattern=r"Simple mixer control '([^']+)'", string=controls)
+        for preferred_control in ALSA_CONTROL_PREFERENCE:
+            if preferred_control in control_names:
+                logger.info(f"Using preferred ALSA mixer control '{preferred_control}' for card {card}.")
+                return f"plughw:{card},0", preferred_control
+
+    card = dac_cards[0]
+    logger.info(f"No preferred ALSA mixer control found for DAC card {card}. Using default.")
+    return f"plughw:{card},0", None
 
 
 def play_wav_file(wav_filename: str, relative_volume: float) -> str:
@@ -151,17 +180,29 @@ def play_wav_file(wav_filename: str, relative_volume: float) -> str:
             ]
         case "Linux":
             relative_volume = math.sqrt(relative_volume / 100) * 100
-            vol_command = ["amixer", "-c", "2", "set", "Digital", f"{relative_volume}%"]
-            command = ["aplay", "-D", "plughw:2,0", str(Path(wav_filename).resolve())]
+            alsa_device, alsa_control = discover_alsa_settings()
+            if alsa_control:
+                mixer_card = alsa_device.removeprefix("plughw:").split(",", maxsplit=1)[0]
+                vol_command = [
+                    "amixer",
+                    "-c",
+                    mixer_card,
+                    "set",
+                    alsa_control,
+                    f"{relative_volume}%",
+                ]
+            command = ["aplay", "-D", alsa_device, str(Path(wav_filename).resolve())]
         case _:
             msg = f"Unrecognized system OS type: {platform.system()}"
             raise NotImplementedError(msg)
 
     if vol_command:
+        logger.info(f"Setting volume using command: {' '.join(vol_command)}")
         result = subprocess.check_output(vol_command, text=True)
         logger.debug(f"Set volume result: {result}")
 
     # Checking output will throw an exception if the cmd line command failed
+    logger.info(f"Playing wav file using command: {' '.join(command)}")
     return subprocess.check_output(command, text=True)
 
 
@@ -185,10 +226,10 @@ def run_experiment(config_filename: str) -> None:
             # - Create a wav file based on the cfg.
             # - Create a row to output to the results file, with the cfg and start tone time
             # - Play the wav file
-            # - Delete the wav file (so they don't accumulate)
+            # - Delete the wav file
             # - Do nothing for a while, based on cfg
             logger.info(f"Run {tone_cfg=}")
-            wav_filename: str = create_sine_wav_file_using_math_wave(
+            wav_filename: str = create_sine_wav_file(
                 duration=tone_cfg[CFG_COL_DURATION],
                 frequency=tone_cfg[CFG_COL_FREQUENCY],
                 relative_volume=tone_cfg[CFG_COL_RELATIVE_VOLUME],
@@ -204,20 +245,6 @@ def run_experiment(config_filename: str) -> None:
             # Sleep until the next tone. We don't need the tone timings to be completely precise, so we don't
             # worry about any delays added by creating wav files etc.
             time.sleep(tone_cfg[CFG_COL_SILENCE_AFTER])
-
-            # Try to generate tone & pipe directly to aplay. (Didn't work)
-            # For each row in the CSV
-            # - @@@ create row to output to the results file
-            # - Tell ffmpeg to generate a sine wave based on config, and pipe to aplay
-            # - Do nothing for a while, based on config file
-            # cmd_string = f"ffmpeg -f lavfi -i
-            #  'sine=frequency={tone_cfg[CFG_COL_FREQUENCY]}:duration={tone_cfg[CFG_COL_DURATION]}'
-            #  -f alsa hw:0,0 | aplay"
-
-            # https://forums.raspberrypi.com/viewtopic.php?t=298333 may help with volume
-            # https://www.procedimento.com.br/?p=go&os=raspberrypi&
-            #  raspberrypi=using-aplay-on-raspberry-pi-a-guide-to-audio-playback
-            # says you can do aplay -V50 <filemame>
 
     except Exception:
         logger.exception("Expected fatal error")
