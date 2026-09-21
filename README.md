@@ -91,13 +91,14 @@ The Monitor runs the full ExPiDITE stack, configured for VibeRig.
 The Controller does not run ExPiDITE - it just needs Python and the VibeRig package so it can run
 `vibe_controller.py`.
 
-1. Flash an SD card with Raspberry Pi OS, install it and power up the RPI. Attach the speaker / shaker
+1. Physically build the controller, attaching the DAC hat to the RPI, connect the DAC to the amp using RCA      cables; and connect the amp to the exciter.  Attach the exciter to the underside of the shake plate.
+2. Flash an SD card with Raspberry Pi OS, install it and power up the RPI. Attach the speaker / shaker
    used to drive the vibration / sound stimuli.
-2. Install VibeRig and its dependencies:
+3. Install VibeRig and its dependencies:
    ```bash
    pip install git+https://github.com/Oxford-Bee-Lab/VibeRig.git
    ```
-3. Confirm the controller scripts and config are present:
+4. Confirm the controller scripts and config are present:
    ```bash
    ls
    ```
@@ -127,6 +128,44 @@ The Controller is used to trigger a vibration stimulus:
    python vibe_controller.py config_test_5_knocks.csv
    ```
    A results file, recording the actual start time of each tone, is written to `~/splat_output`.
+
+### Debugging the audio chain (DAC hat → amp → exciter)
+
+If the exciter isn't producing vibration, work through each hop in the chain in turn, from the RPI
+outwards:
+
+1. **RPI → DAC hat**: confirm the DAC hat is detected as an ALSA sound card.
+   ```bash
+   aplay -l
+   cat /proc/asound/cards
+   ```
+   Note the card number (e.g. `2`) - it's used as `-c`/`-D` in the commands below. Then confirm the
+   output isn't muted or at zero volume:
+   ```bash
+   alsamixer -c 2
+   ```
+
+2. **DAC hat → amp (RCA)**: play a continuous test tone out of the DAC and check for signal before the
+   amp (using headphones on the RCA output):
+   ```bash
+   speaker-test -D plughw:2,0 -c 2 -t sine -f 440
+   ```
+   Stop with Ctrl+C. If there's no signal here, the fault is between the RPI and the DAC (driver/config
+   issue), not the amp or exciter.
+
+3. **Amp → exciter**: with the amp powered on and volume up, play a low-frequency tone similar to the
+   stimuli used in the rig, and confirm the exciter can be felt/heard responding:
+   ```bash
+   speaker-test -D plughw:2,0 -c 1 -t sine -f 40
+   ```
+   Check the amp's input/power LEDs light up while the tone plays. If the amp is receiving signal but
+   the exciter is silent, suspect the exciter itself, its wiring, or the amp's output stage.
+
+4. **End-to-end**: once each hop checks out, confirm the full pipeline with one of the actual test
+   configs:
+   ```bash
+   python vibe_controller.py config_test_5_knocks.csv
+   ```
 
 ### Monitor: continuous recording
 
