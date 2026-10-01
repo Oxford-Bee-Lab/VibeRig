@@ -125,7 +125,11 @@ The Controller is used to trigger a vibration stimulus:
 2. Choose a bundled `config_test*.csv` file or provide a path to your own CSV. Each row defines one tone:
    `frequency`, `duration_seconds`, `relative_volume` and
    `silence_after`.
-3. Trigger the stimulus with the module invocation, passing the CSV name or path as the only argument:
+3. Enable the virtual environment
+   ```bash
+   source ./venv/bin/activate
+   ```
+5. Trigger the stimulus with the module invocation, passing the CSV name or path as the only argument:
    ```bash
    python -m VibeRig.controller.vibe_controller config_test_5_knocks.csv
    ```
