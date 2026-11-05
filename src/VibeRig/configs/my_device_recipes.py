@@ -39,7 +39,8 @@ def create_vibe_rig_monitor() -> list[DPtree]:
     video_cfg: RpicamSensorCfg = replace(
         DEFAULT_RPICAM_SENSOR_CFG,
         rpicam_cmd=(
-            "rpicam-vid --camera SENSOR_INDEX --framerate 10 --width 1296 --height 1296 -o FILENAME -t 180000"
+            "rpicam-vid -b 8000000 --camera SENSOR_INDEX --framerate 10  --lens-position 16 "
+            "--width 1296 --height 1296 -o FILENAME -t 180000"
         ),
         outputs=[rpicam_stream, RPICAM_REVIEW_MODE_STREAM],
     )
