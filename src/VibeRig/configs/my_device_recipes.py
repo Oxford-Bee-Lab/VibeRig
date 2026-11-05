@@ -2,10 +2,10 @@ from dataclasses import replace
 
 from expidite_rpi import DPtree
 from expidite_rpi import configuration as root_cfg
-from expidite_rpi.sensors.sensor_adxl34x import (
-    ADXL34X,
-    DEFAULT_ADXL34X_SENSOR_CFG,
-)
+#from expidite_rpi.sensors.sensor_adxl34x import (
+#    ADXL34X,
+#    DEFAULT_ADXL34X_SENSOR_CFG,
+#)
 from expidite_rpi.sensors.sensor_continuous_audio import (
     DEFAULT_CONTINUOUS_AUDIO_SENSOR_CFG,
     ContinuousAudioSensor,
@@ -39,7 +39,7 @@ def create_vibe_rig_monitor() -> list[DPtree]:
     video_cfg: RpicamSensorCfg = replace(
         DEFAULT_RPICAM_SENSOR_CFG,
         rpicam_cmd=(
-            "rpicam-vid -b 3000000 --camera SENSOR_INDEX --framerate 5  --lens-position 16 "
+            "rpicam-vid -b 2500000 --camera SENSOR_INDEX --framerate 5  --lens-position 5 "
             "--width 1296 --height 1296 -o FILENAME -t 180000"
         ),
         outputs=[rpicam_stream, RPICAM_REVIEW_MODE_STREAM],
