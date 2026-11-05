@@ -47,12 +47,12 @@ def create_vibe_rig_monitor() -> list[DPtree]:
     my_video_sensor = RpicamSensor(video_cfg)
 
     # Define the AXCL343 sensor
-    my_axcl343_sensor = ADXL34X(DEFAULT_ADXL34X_SENSOR_CFG)
+    #my_axcl343_sensor = ADXL34X(DEFAULT_ADXL34X_SENSOR_CFG)
 
-    #my_audio_tree = DPtree(my_audio_sensor)
+    my_audio_tree = DPtree(my_audio_sensor)
     my_video_tree = DPtree(my_video_sensor)
-    my_adxl_tree = DPtree(my_axcl343_sensor)
-    return [my_video_tree, my_adxl_tree]
+    #my_adxl_tree = DPtree(my_axcl343_sensor)
+    return [my_audio_tree, my_video_tree]
 
 
 def create_vibe_rig_controller() -> list[DPtree]:
