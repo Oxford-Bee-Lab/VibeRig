@@ -54,7 +54,7 @@ INVENTORY: list[DeviceCfg] = [
     ),
     # d83adde7655a
     DeviceCfg(
-        name="Vibe-rig-monitor",
+        name="Vibe-rig-monitor-test-at-LC",
         device_id="d83adde7655a",
         notes="Temp vibe rig monitor at LC",
         dp_trees_create_method=my_device_recipes.create_vibe_rig_monitor,
